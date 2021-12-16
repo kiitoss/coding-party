@@ -6,10 +6,10 @@ all : coding-party
 
 coding-party : initial chef
 
-initial : initial.c
+initial : initial.c global.h
 	$(CC) $(OPTIONS) initial.c -o initial
 
-chef : chef.c
+chef : chef.c global.h
 	$(CC) $(OPTIONS) chef.c -o chef
 
 clean :

@@ -4,6 +4,9 @@
 #define MIN_MECANOS 3
 #define MIN_OUTILS 1
 
+#define MAX_CHEFS 1000
+#define MAX_MECANOS 1000
+
 /* Fonction d'usage du programme */
 void usage(char *s) {
     fprintf(stderr, "Usage: %s <nb_chefs> <nb_mecanos>", s);
@@ -36,9 +39,11 @@ int main(int argc, char *argv[]) {
 
     nb_chefs = atoi(argv[1]);
     if (nb_chefs < MIN_CHEFS) usage(argv[0]);
+    if (nb_chefs > MAX_CHEFS) nb_chefs = MAX_CHEFS;
 
     nb_mecanos = atoi(argv[2]);
     if (nb_mecanos < MIN_MECANOS) usage(argv[0]);
+    if (nb_mecanos > MAX_MECANOS) nb_mecanos = MAX_MECANOS;
 
     for (int i = 0; i < NB_OUTILS; i++) {
         outils[i] = argv[3+i];
@@ -80,13 +85,19 @@ int main(int argc, char *argv[]) {
     
 
     fprintf(stderr, "Allumage des fours ... !\n");
-    for(int i = 0; i < nb_chefs; i++) {
+
+    /* creation d'une string de taille optimale por sotcker l'ordre du chef */
+    int taille_nb = ((int) log10(nb_chefs)) + 1;
+    char nb_chef_str[taille_nb];
+
+    for(int i = 1; i <= nb_chefs; i++) {
 	    pid_chef = fork();   
         if (pid_chef == -1) break;
         if (pid_chef == 0) {
-            char *args_chef[3 + NB_OUTILS] = {"chef"};
-            for (int j = 0; j < NB_OUTILS; j++) args_chef[3 + i] = outils[i];
-            args_chef[2 + NB_OUTILS] = NULL;
+            sprintf(nb_chef_str, "%d", i);
+            char *args_chef[4 + NB_OUTILS] = {"chef", nb_chef_str};
+            for (int j = 0; j < NB_OUTILS; j++) args_chef[4 + i] = outils[i];
+            args_chef[3 + NB_OUTILS] = NULL;
             execv("chef", args_chef);
             exit(EXIT_FAILURE);
         }

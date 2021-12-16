@@ -8,6 +8,8 @@ int main(int argc, char *argv[]) {
     int mem_part_mecano;
     int *tab;
 
+    int ordre = atoi(argv[1]);
+
     /* On teste si le fichier cle existe dans le repertoire courant */
     if (stat(FICHIER_CLE, &st) == -1) {
 	    fprintf(stderr,"(chef) Probleme creation fichier cle\n");
