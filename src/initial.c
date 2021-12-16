@@ -45,13 +45,11 @@ void mon_sigaction(int signal, void (*f)(int)) {
 void exec_travailleurs(int nb, char *path, int argc, char *argv[]) {
     pid_t pid;
 
-    
-
     /* creation d'une string de taille optimale por sotcker l'ordre du travailleur */
     int taille_ordre = ((int) log10((double) nb)) + 1;
     char ordre[taille_ordre];
 
-    char *argv_exec[3 + argc];
+    char *argv_exec[4 + argc];
     argv_exec[0] = path;
 
     
@@ -140,21 +138,21 @@ int main(int argc, char *argv[]) {
     }
 
     /* On cree le semaphore (meme cle) */
-    // semap = semget(cle_mecano, NB_OUTILS, IPC_CREAT | 0660);
-    // if (semap == -1) {
-	//     fprintf(stderr, "Probleme creation ensemble de semaphore ou il existe deja\n");
-	//     deconnexion_fm_mecano(fm);
-	//     exit(EXIT_FAILURE);
-    // }
+    semap = semget(cle_mecano, NB_OUTILS, IPC_CREAT | 0660);
+    if (semap == -1) {
+	    fprintf(stderr, "Probleme creation ensemble de semaphore ou il existe deja\n");
+	    deconnexion_fm_mecano(fm);
+	    exit(EXIT_FAILURE);
+    }
 
-    // /* On l'initialise */
-    // if (semctl(semap, 1, SETALL, outils) == -1) {
-	//     printf("Probleme initialisation semaphore\n");
-	//     /* On detruit les IPC deje crees : */
-    //     semctl(semap, 1, IPC_RMID, NULL);
-    //     deconnexion_fm_mecano(fm);
-    //     exit(EXIT_FAILURE);
-    // }
+    /* On l'initialise */
+    if (semctl(semap, 1, SETALL, outils) == -1) {
+	    printf("Probleme initialisation semaphore\n");
+	    /* On detruit les IPC deje crees : */
+        semctl(semap, 1, IPC_RMID, NULL);
+        deconnexion_fm_mecano(fm);
+        exit(EXIT_FAILURE);
+    }
 
     mon_sigaction(SIGUSR1, arret);
 
@@ -167,7 +165,7 @@ int main(int argc, char *argv[]) {
     fprintf(stderr, "\tmecaniciens prêts !\n");
 
     
-    for(;;) {}
+    // for(;;) {}
     
 
     return EXIT_SUCCESS;
