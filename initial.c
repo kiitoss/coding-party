@@ -1,7 +1,5 @@
-#include <stdio.h>
-#include <stdlib.h>
+#include "global.h"
 
-#define NB_OUTILS 4
 #define MIN_CHEFS 2
 #define MIN_MECANOS 3
 #define MIN_OUTILS 1
@@ -21,8 +19,10 @@ void usage(char *s) {
 /* Fonction principale du programme */
 int main(int argc, char *argv[]) {
     int nb_chefs, nb_mecanos;
-    int outils[NB_OUTILS];
+    char *outils[NB_OUTILS];
     int param_valides = 1;
+
+    pid_t pid;
 
     /* Verficiation des parametres */
     if (argc < 3 + NB_OUTILS) {
@@ -36,11 +36,29 @@ int main(int argc, char *argv[]) {
     if (nb_mecanos < MIN_MECANOS) usage(argv[0]);
 
     for (int i = 0; i < NB_OUTILS; i++) {
-        outils[i] = atoi(argv[3+i]);
-        if (outils[i] < MIN_OUTILS) {
+        outils[i] = argv[3+i];
+        if (atoi(outils[i]) < MIN_OUTILS) {
             param_valides = 0;
             break;
         }
     }
     if (!param_valides) usage(argv[0]);
+
+
+    fprintf(stderr, "Allumage des fours ... !\n");
+    for(int i = 0; i < nb_chefs; i++) {
+	    pid = fork();   
+        if (pid == -1) break;
+        if (pid == 0) {
+            char *args_chef[3 + NB_OUTILS] = {"chef"};
+            for (int j = 0; j < NB_OUTILS; j++) args_chef[3 + i] = outils[i];
+            args_chef[2 + NB_OUTILS] = NULL;
+            execv("chef", args_chef);
+            exit(EXIT_FAILURE);
+        }
+    }
+    usleep(500000);
+    fprintf(stderr, "... fours prêts !\n");
+
+    return EXIT_SUCCESS;
 }
