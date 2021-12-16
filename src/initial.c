@@ -1,6 +1,6 @@
-#include "global.h"
-
 #include <math.h>
+
+#include "../includes/global.h"
 
 #define MIN_CHEFS 2
 #define MIN_MECANOS 3
@@ -117,7 +117,7 @@ int main(int argc, char *argv[]) {
     fprintf(stderr, "\tfours prêts !\n");
 
     fprintf(stderr, "\nEchauffement des mecaniciens\t");
-    lance_travailleurs(nb_chefs, "chef", 0, NULL);
+    lance_travailleurs(nb_mecanos, "mecanicien", 0, NULL);
     fprintf(stderr, "\tmecaniciens prêts !\n");
 
 
