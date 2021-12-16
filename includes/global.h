@@ -11,6 +11,3 @@
 #include <time.h>
 
 #define NB_OUTILS 4
-
-#define FICHIER_CLE "cle.serv"
-#define LETTRE_CODE_MECANO 'm'

@@ -29,7 +29,7 @@ void arret() {
     fprintf(stdout,"Le garage ferme ses portes.\n");
     killpg(0, SIGUSR1);
     semctl(semap, 1, IPC_RMID, NULL);
-    deconnexion_fm_mecano(fm);
+    deconnexion_fm(fm);
     exit(EXIT_FAILURE);
 }
 
@@ -42,11 +42,15 @@ void mon_sigaction(int signal, void (*f)(int)) {
 }
 
 
+int taille_int(int i) {
+    return ((int) log10((double) i)) + 1;
+}
+
 void exec_travailleurs(int nb, char *path, int argc, char *argv[]) {
     pid_t pid;
 
     /* creation d'une string de taille optimale por sotcker l'ordre du travailleur */
-    int taille_ordre = ((int) log10((double) nb)) + 1;
+    int taille_ordre = taille_int(nb);
     char ordre[taille_ordre];
 
     char *argv_exec[4 + argc];
@@ -71,6 +75,27 @@ void exec_travailleurs(int nb, char *path, int argc, char *argv[]) {
         }
     }
     usleep(500000);
+}
+
+void cree_clients(int nb_chefs) {
+    pid_t pid;
+    
+    /* creation d'une string de taille optimale por sotcker l'ordre du travailleur */
+    int taille_chefs = taille_int(nb_chefs);
+    char nb_chefs_str[taille_chefs];
+    sprintf(nb_chefs_str, "%d", nb_chefs);
+
+    for(;;) {
+        pid = fork(); 
+         
+        if (pid == -1) break;
+        if (pid == 0) {
+            execl("client", "client", nb_chefs_str, NULL);
+            exit(EXIT_FAILURE);
+        }
+
+        sleep(2);
+    }
 }
 
 /* Fonction principale du programme */
@@ -141,7 +166,7 @@ int main(int argc, char *argv[]) {
     semap = semget(cle_mecano, NB_OUTILS, IPC_CREAT | 0660);
     if (semap == -1) {
 	    fprintf(stderr, "Probleme creation ensemble de semaphore ou il existe deja\n");
-	    deconnexion_fm_mecano(fm);
+	    deconnexion_fm(fm);
 	    exit(EXIT_FAILURE);
     }
 
@@ -150,7 +175,7 @@ int main(int argc, char *argv[]) {
 	    printf("Probleme initialisation semaphore\n");
 	    /* On detruit les IPC deje crees : */
         semctl(semap, 1, IPC_RMID, NULL);
-        deconnexion_fm_mecano(fm);
+        deconnexion_fm(fm);
         exit(EXIT_FAILURE);
     }
 
@@ -165,8 +190,7 @@ int main(int argc, char *argv[]) {
     fprintf(stderr, "\tmecaniciens prêts !\n");
 
     
-    // for(;;) {}
-    
+    // cree_clients(nb_chefs);
 
     return EXIT_SUCCESS;
 }

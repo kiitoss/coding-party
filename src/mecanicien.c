@@ -15,7 +15,7 @@ int main(int argc, char *argv[]) {
         sops[i].sem_flg = SEM_UNDO;
     }
     
-    connexion_fm_mecano("mecanicien", &cle, &fm);
+    connexion_fm("mecanicien", LETTRE_CODE_MECANO, &cle, &fm);
 
     /* Recuperation semaphore */
     int semap = semget(cle, 1, 0);
