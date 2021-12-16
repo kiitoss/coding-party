@@ -1,0 +1,1 @@
+int connexion_fm_mecano(char *type_travailleur);

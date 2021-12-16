@@ -22,27 +22,28 @@ void usage(char *s) {
 }
 
 
-void lance_travailleurs(int nb, char *path, int argc, char *args[]) {
+void lance_travailleurs(int nb, char *path, int argc, char *argv[]) {
     pid_t pid;
 
     /* creation d'une string de taille optimale por sotcker l'ordre du travailleur */
     int taille_ordre = ((int) log10((double) nb)) + 1;
     char ordre[taille_ordre];
 
-    char *args_exec[4 + argc];
-    args_exec[0] = path;
+    char *argv_exec[4 + argc];
+    argv_exec[0] = path;
     for (int j = 0; j < argc; j++) {
-        args_exec[4 + j] = args[j];
+        argv_exec[1 + j] = argv[j];
     }
-    args_exec[3 + argc] = NULL;
+    argv_exec[2 + argc] = NULL;
 
     for(int i = 1; i <= nb; i++) {
-	    pid = fork();   
+	    pid = fork(); 
+         
         if (pid == -1) break;
         if (pid == 0) {
             sprintf(ordre, "%d", i);
-            args_exec[1] = ordre;
-            execv(path, args_exec);
+            argv_exec[1] = ordre;
+            execv(path, argv_exec);
             exit(EXIT_FAILURE);
         }
     }
@@ -55,10 +56,9 @@ int main(int argc, char *argv[]) {
     char *outils[NB_OUTILS];
     int param_valides = 1;
 
-    struct stat st;
+    FILE *fich_cle;
     key_t cle_mecano;
-    int mem_part_mecano;
-    int *tab;
+    int fm;
 
     /* Verficiation des parametres */
     if (argc < 3 + NB_OUTILS) {
@@ -83,10 +83,21 @@ int main(int argc, char *argv[]) {
     if (!param_valides) usage(argv[0]);
 
 
-    /* On teste si le fichier cle existe dans le repertoire courant */
-    if ((stat(FICHIER_CLE, &st) == -1) && (open(FICHIER_CLE, O_RDONLY | O_CREAT | O_EXCL, 0660) == -1)) {
-	    fprintf(stderr,"Pas de fichier cle pour les mecanos et probleme creation fichier cle\n");
-        exit(EXIT_FAILURE);
+    /* Creation de la cle */
+    /* 1 - On teste si le fichier cle existe dans le repertoire courant */
+    fich_cle = fopen(FICHIER_CLE, "r");
+    if (fich_cle == NULL){
+        if (errno == ENOENT){
+            /* on le cree */
+            fich_cle = fopen(FICHIER_CLE, "w");
+            if (fich_cle == NULL){
+                fprintf(stderr, "Ouverture du garage impossible\n");
+                exit(EXIT_FAILURE);
+            }
+        } else {
+            fprintf(stderr, "Ouverture du garage impossible\n");
+            exit(EXIT_FAILURE);
+        }
     }
 
     cle_mecano = ftok(FICHIER_CLE, LETTRE_CODE_MECANO);
@@ -95,38 +106,24 @@ int main(int argc, char *argv[]) {
 	    exit(EXIT_FAILURE);
     }
 
-    /* On cree le SMP et on teste s'il existe deja */
-    mem_part_mecano = shmget(cle_mecano, sizeof(entree_smp_mecano), IPC_CREAT | IPC_EXCL | 0660);
-    if (mem_part_mecano == -1) {
-	    fprintf(stderr, "Probleme creation SMP ou il existe deja\n");
+    /* Creation file de message */
+    fm = msgget(cle_mecano, IPC_CREAT | 0660);
+    if (fm == -1) {
+	    fprintf(stderr, "Probleme creation file de message\n");
 	    exit(EXIT_FAILURE);
     }
-
-    /* Attachement de la memoire partagee */
-    tab = shmat(mem_part_mecano, NULL, 0);
-    if (tab == (int *) -1){
-	    fprintf(stderr, "Probleme attachement\n");
-	    /* Il faut detruire le SMP puisqu'on l'a cree : */
-	    shmctl(mem_part_mecano,IPC_RMID,NULL);
-	    exit(EXIT_FAILURE);
-    }
-    
 
     fprintf(stderr, "Allumage des fours\t\t");
     lance_travailleurs(nb_chefs, "chef", NB_OUTILS, outils);
     fprintf(stderr, "\tfours prêts !\n");
-
+    
     fprintf(stderr, "\nEchauffement des mecaniciens\t");
     lance_travailleurs(nb_mecanos, "mecanicien", 0, NULL);
     fprintf(stderr, "\tmecaniciens prêts !\n");
 
+    
 
-    /* On nettoie */
-    /* Detachement SMP */
-    shmdt(tab);
-
-    /* Destruction SMP */
-    shmctl(mem_part_mecano, IPC_RMID, NULL);
+    
 
     return EXIT_SUCCESS;
 }
