@@ -27,6 +27,7 @@ void usage(char *s) {
 
 void arret() {
     fprintf(stdout,"Le garage ferme ses portes.\n");
+    killpg(0, SIGUSR1);
     deconnexion_fm_mecano(fm);
     exit(EXIT_FAILURE);
 }
@@ -76,6 +77,8 @@ int main(int argc, char *argv[]) {
 
     FILE *fich_cle;
     key_t cle_mecano;
+
+    int semap;
 
     /* Verficiation des parametres */
     if (argc < 3 + NB_OUTILS) {
@@ -128,6 +131,23 @@ int main(int argc, char *argv[]) {
     if (fm == -1) {
 	    fprintf(stderr, "Probleme creation file de message\n");
 	    exit(EXIT_FAILURE);
+    }
+
+    /* On cree le semaphore (meme cle) */
+    semap = semget(cle_mecano, NB_OUTILS, IPC_CREAT | 0660);
+    if (semap == -1) {
+	    fprintf(stderr, "Probleme creation ensemble de semaphore ou il existe deja\n");
+	    deconnexion_fm_mecano(fm);
+	    exit(EXIT_FAILURE);
+    }
+
+    /* On l'initialise */
+    if (semctl(semap, 1, SETALL, outils) == -1) {
+	    printf("Probleme initialisation semaphore\n");
+	    /* On detruit les IPC deje crees : */
+        semctl(semap, 1, IPC_RMID, NULL);
+        deconnexion_fm_mecano(fm);
+        exit(EXIT_FAILURE);
     }
 
     mon_sigaction(SIGUSR1, arret);

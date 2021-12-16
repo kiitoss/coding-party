@@ -10,15 +10,15 @@ int main(int argc, char *argv[]) {
     
 
     printf("Attend travail type %d\n", ordre);
-    reponse_t rep = attend_reponse(fm, ordre);
+    requete_t rep = attend_reponse(fm, ordre);
     
     
-    sleep(5);
+    usleep(rep.duree * 1000);
     if (ordre == 2) {
         sleep(40);
     }
     printf("Envoie requete fin travail\n");
-    envoie_requete(fm, ordre);
+    envoie_requete(fm, ordre, 0);
     
 
     exit(EXIT_SUCCESS);

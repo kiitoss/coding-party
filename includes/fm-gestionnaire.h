@@ -1,17 +1,16 @@
-typedef struct {
-    long type;
-} requete_t;
+#include "global.h"
 
 typedef struct {
     long type;
-    int ordre_exp;
-} reponse_t;
+    int duree;
+    int outils[NB_OUTILS];
+} requete_t;
 
 
 int connexion_fm_mecano(char *type_travailleur);
 
 void deconnexion_fm_mecano(int fm);
 
-void envoie_requete(int fm, int ordre_exp);
+void envoie_requete(int fm, int ordre_exp, int duree);
 
-reponse_t attend_reponse(int fm, int ordre_exp);
+requete_t attend_reponse(int fm, int ordre_exp);
