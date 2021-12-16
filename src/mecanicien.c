@@ -2,8 +2,8 @@
 #include "../includes/fm-gestionnaire.h"
 
 int main(int argc, char *argv[]) {
-    // int ordre = atoi(argv[1]);
-    // int fm = connexion_fm_mecano("mecanicien");
+    int ordre = atoi(argv[1]);
+    int fm = connexion_fm_mecano("mecanicien");
 
     printf(".");
 

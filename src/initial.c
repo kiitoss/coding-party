@@ -1,6 +1,8 @@
 #include <math.h>
+#include <signal.h>
 
 #include "../includes/global.h"
+#include "../includes/fm-gestionnaire.h"
 
 #define MIN_CHEFS 2
 #define MIN_MECANOS 3
@@ -8,6 +10,8 @@
 
 #define MAX_CHEFS 500
 #define MAX_MECANOS 500
+
+int fm;
 
 /* Fonction d'usage du programme */
 void usage(char *s) {
@@ -21,8 +25,22 @@ void usage(char *s) {
     exit(EXIT_FAILURE);
 }
 
+void arret() {
+    fprintf(stdout,"Le garage ferme ses portes.\n");
+    deconnexion_fm_mecano(fm);
+    exit(EXIT_FAILURE);
+}
 
-void lance_travailleurs(int nb, char *path, int argc, char *argv[]) {
+void mon_sigaction(int signal, void (*f)(int)) {
+    struct sigaction action;
+    action.sa_handler = f;
+    sigemptyset(&action.sa_mask);
+    action.sa_flags = 0;
+    sigaction(signal,&action,NULL);
+}
+
+
+void exec_travailleurs(int nb, char *path, int argc, char *argv[]) {
     pid_t pid;
 
     /* creation d'une string de taille optimale por sotcker l'ordre du travailleur */
@@ -58,7 +76,6 @@ int main(int argc, char *argv[]) {
 
     FILE *fich_cle;
     key_t cle_mecano;
-    int fm;
 
     /* Verficiation des parametres */
     if (argc < 3 + NB_OUTILS) {
@@ -113,16 +130,18 @@ int main(int argc, char *argv[]) {
 	    exit(EXIT_FAILURE);
     }
 
+    mon_sigaction(SIGUSR1, arret);
+
     fprintf(stderr, "Allumage des fours\t\t");
-    lance_travailleurs(nb_chefs, "chef", NB_OUTILS, outils);
+    exec_travailleurs(nb_chefs, "chef", NB_OUTILS, outils);
     fprintf(stderr, "\tfours prêts !\n");
     
     fprintf(stderr, "\nEchauffement des mecaniciens\t");
-    lance_travailleurs(nb_mecanos, "mecanicien", 0, NULL);
+    exec_travailleurs(nb_mecanos, "mecanicien", 0, NULL);
     fprintf(stderr, "\tmecaniciens prêts !\n");
 
     
-
+    for(;;) {}
     
 
     return EXIT_SUCCESS;

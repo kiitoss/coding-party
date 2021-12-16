@@ -6,8 +6,8 @@ all : coding-party
 
 coding-party : initial chef mecanicien
 
-initial : src/initial.c includes/global.h
-	$(CC) $(OPTIONS) src/initial.c -o initial -lm
+initial : src/initial.c includes/global.h includes/fm-gestionnaire.h
+	$(CC) $(OPTIONS) src/initial.c src/fm-gestionnaire.c -o initial -lm
 
 chef : src/chef.c src/fm-gestionnaire.c includes/global.h includes/fm-gestionnaire.h
 	$(CC) $(OPTIONS) src/chef.c src/fm-gestionnaire.c -o chef

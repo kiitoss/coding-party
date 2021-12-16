@@ -1,21 +1,19 @@
 #include "../includes/global.h"
 #include "../includes/fm-gestionnaire.h"
 
-
 int connexion_fm_mecano(char *type_travailleur) {
     key_t cle_mecano;
-    int fm;
     FILE *fich_cle;
+    int fm;
 
-
-    /* Creation de la cle :          */
-    /* 1 - On teste si le fichier cle existe dans le repertoire courant : */
+    /* On teste si le fichier cle existe dans le repertoire courant */
     fich_cle = fopen(FICHIER_CLE,"r");
     if (fich_cle == NULL) {
         fprintf(stderr, "(%s) Lancement client impossible\n", type_travailleur);
         exit(EXIT_FAILURE);
     }
 
+    /* Creation de la cle */
     cle_mecano = ftok(FICHIER_CLE, LETTRE_CODE_MECANO);
     if (cle_mecano == -1) {
 	    fprintf(stderr, "(%s) Probleme creation cle\n", type_travailleur);
@@ -30,4 +28,34 @@ int connexion_fm_mecano(char *type_travailleur) {
     }
 
     return fm;
+}
+
+void deconnexion_fm_mecano(int fm) {
+    msgctl(fm, IPC_RMID, NULL);
+}
+
+
+void envoie_requete(int fm, int ordre_exp) {
+    requete_t requete;
+
+    /* creation de la requete */
+    requete.ordre_exp = ordre_exp;
+    
+    /* envoi de la requete */
+    msgsnd(fm, &requete, sizeof(requete_t), 0);
+}
+
+
+reponse_t attend_reponse(int fm) {
+    reponse_t reponse;
+    int res_rcv;
+
+    /* attente de la reponse */
+    res_rcv = msgrcv(fm, &reponse, sizeof(reponse_t), 1, 0);
+    if (res_rcv == -1) {
+	    fprintf(stderr, "Erreur, numero %d\n", errno);
+	    exit(EXIT_FAILURE);
+    }
+
+    return reponse;
 }
