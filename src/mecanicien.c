@@ -3,11 +3,12 @@
 
 int main(int argc, char *argv[]) {
     int ordre = atoi(argv[1]);
-    int fm = connexion_fm_mecano("mecanicien");
+    int fm;
+    
+    connexion_fm_mecano("mecanicien", NULL, &fm);
 
     printf(".");
 
-    
 
     printf("Attend travail type %d\n", ordre);
     requete_t rep = attend_reponse(fm, ordre);

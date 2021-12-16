@@ -16,4 +16,4 @@ mecanicien : src/mecanicien.c src/fm-gestionnaire.c includes/global.h includes/f
 	$(CC) $(OPTIONS) src/mecanicien.c src/fm-gestionnaire.c -o mecanicien
 
 clean :
-	rm -f initial chef mecanicien cle.serv && pkill initial && pkill chef && pkill mecanicien
+	rm -f initial chef mecanicien cle.serv

@@ -7,7 +7,7 @@ typedef struct {
 } requete_t;
 
 
-int connexion_fm_mecano(char *type_travailleur);
+void connexion_fm_mecano(char *type_travailleur, key_t *cle, int *fm);
 
 void deconnexion_fm_mecano(int fm);
 

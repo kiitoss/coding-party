@@ -11,7 +11,7 @@
 #define MAX_CHEFS 500
 #define MAX_MECANOS 500
 
-int fm;
+int fm, semap;
 
 /* Fonction d'usage du programme */
 void usage(char *s) {
@@ -28,6 +28,7 @@ void usage(char *s) {
 void arret() {
     fprintf(stdout,"Le garage ferme ses portes.\n");
     killpg(0, SIGUSR1);
+    semctl(semap, 1, IPC_RMID, NULL);
     deconnexion_fm_mecano(fm);
     exit(EXIT_FAILURE);
 }
@@ -44,16 +45,21 @@ void mon_sigaction(int signal, void (*f)(int)) {
 void exec_travailleurs(int nb, char *path, int argc, char *argv[]) {
     pid_t pid;
 
+    
+
     /* creation d'une string de taille optimale por sotcker l'ordre du travailleur */
     int taille_ordre = ((int) log10((double) nb)) + 1;
     char ordre[taille_ordre];
 
-    char *argv_exec[4 + argc];
+    char *argv_exec[3 + argc];
     argv_exec[0] = path;
-    for (int j = 0; j < argc; j++) {
-        argv_exec[1 + j] = argv[j];
+
+    
+    for (int i = 0; i < argc; i++) {
+        argv_exec[1 + i] = argv[i];
     }
     argv_exec[2 + argc] = NULL;
+
 
     for(int i = 1; i <= nb; i++) {
 	    pid = fork(); 
@@ -72,13 +78,12 @@ void exec_travailleurs(int nb, char *path, int argc, char *argv[]) {
 /* Fonction principale du programme */
 int main(int argc, char *argv[]) {
     int nb_chefs, nb_mecanos;
-    char *outils[NB_OUTILS];
+    char *outils_str[NB_OUTILS];
+    int outils[NB_OUTILS];
     int param_valides = 1;
 
     FILE *fich_cle;
     key_t cle_mecano;
-
-    int semap;
 
     /* Verficiation des parametres */
     if (argc < 3 + NB_OUTILS) {
@@ -94,8 +99,9 @@ int main(int argc, char *argv[]) {
     if (nb_mecanos > MAX_MECANOS) nb_mecanos = MAX_MECANOS;
 
     for (int i = 0; i < NB_OUTILS; i++) {
-        outils[i] = argv[3+i];
-        if (atoi(outils[i]) < MIN_OUTILS) {
+        outils_str[i] = argv[3+i];
+        outils[i] = atoi(outils_str[i]);
+        if (outils[i] < MIN_OUTILS) {
             param_valides = 0;
             break;
         }
@@ -134,26 +140,26 @@ int main(int argc, char *argv[]) {
     }
 
     /* On cree le semaphore (meme cle) */
-    semap = semget(cle_mecano, NB_OUTILS, IPC_CREAT | 0660);
-    if (semap == -1) {
-	    fprintf(stderr, "Probleme creation ensemble de semaphore ou il existe deja\n");
-	    deconnexion_fm_mecano(fm);
-	    exit(EXIT_FAILURE);
-    }
+    // semap = semget(cle_mecano, NB_OUTILS, IPC_CREAT | 0660);
+    // if (semap == -1) {
+	//     fprintf(stderr, "Probleme creation ensemble de semaphore ou il existe deja\n");
+	//     deconnexion_fm_mecano(fm);
+	//     exit(EXIT_FAILURE);
+    // }
 
-    /* On l'initialise */
-    if (semctl(semap, 1, SETALL, outils) == -1) {
-	    printf("Probleme initialisation semaphore\n");
-	    /* On detruit les IPC deje crees : */
-        semctl(semap, 1, IPC_RMID, NULL);
-        deconnexion_fm_mecano(fm);
-        exit(EXIT_FAILURE);
-    }
+    // /* On l'initialise */
+    // if (semctl(semap, 1, SETALL, outils) == -1) {
+	//     printf("Probleme initialisation semaphore\n");
+	//     /* On detruit les IPC deje crees : */
+    //     semctl(semap, 1, IPC_RMID, NULL);
+    //     deconnexion_fm_mecano(fm);
+    //     exit(EXIT_FAILURE);
+    // }
 
     mon_sigaction(SIGUSR1, arret);
 
     fprintf(stderr, "Allumage des fours\t\t");
-    exec_travailleurs(nb_chefs, "chef", NB_OUTILS, outils);
+    exec_travailleurs(nb_chefs, "chef", NB_OUTILS, outils_str);
     fprintf(stderr, "\tfours prêts !\n");
     
     fprintf(stderr, "\nEchauffement des mecaniciens\t");
