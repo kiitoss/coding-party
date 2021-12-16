@@ -7,5 +7,19 @@ int main(int argc, char *argv[]) {
 
     printf(".");
 
+    
+
+    printf("Attend travail type %d\n", ordre);
+    reponse_t rep = attend_reponse(fm, ordre);
+    
+    
+    sleep(5);
+    if (ordre == 2) {
+        sleep(40);
+    }
+    printf("Envoie requete fin travail\n");
+    envoie_requete(fm, ordre);
+    
+
     exit(EXIT_SUCCESS);
 }

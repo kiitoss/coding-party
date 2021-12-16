@@ -1,8 +1,9 @@
 typedef struct {
-    int ordre_exp;
+    long type;
 } requete_t;
 
 typedef struct {
+    long type;
     int ordre_exp;
 } reponse_t;
 
@@ -13,4 +14,4 @@ void deconnexion_fm_mecano(int fm);
 
 void envoie_requete(int fm, int ordre_exp);
 
-reponse_t attend_reponse(int fm);
+reponse_t attend_reponse(int fm, int ordre_exp);

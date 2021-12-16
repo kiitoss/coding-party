@@ -8,9 +8,10 @@ int main(int argc, char *argv[]) {
     printf(".");
 
     sleep(5);
-    printf("Envoie requete mecano\n");
+
+    printf("Envoie requete mecano %d\n", ordre);
     envoie_requete(fm, ordre);
-    reponse_t rep = attend_reponse(fm);
-    printf("Retour du mecano\n");
+    reponse_t rep = attend_reponse(fm, ordre);
+    printf("Retour du mecano %d\n", ordre);
     exit(EXIT_SUCCESS);
 }
