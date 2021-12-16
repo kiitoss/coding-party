@@ -7,8 +7,6 @@
 #include <sys/ipc.h>
 #include <sys/shm.h>
 
-#include <math.h>
-
 #define NB_OUTILS 4
 
 #define FICHIER_CLE "cle.serv"

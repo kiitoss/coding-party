@@ -1,5 +1,7 @@
 #include "global.h"
 
+#include <math.h>
+
 #define MIN_CHEFS 2
 #define MIN_MECANOS 3
 #define MIN_OUTILS 1
@@ -87,7 +89,7 @@ int main(int argc, char *argv[]) {
     fprintf(stderr, "Allumage des fours ... !\n");
 
     /* creation d'une string de taille optimale por sotcker l'ordre du chef */
-    int taille_nb = ((int) log10(nb_chefs)) + 1;
+    int taille_nb = ((int) log10((double) nb_chefs)) + 1;
     char nb_chef_str[taille_nb];
 
     for(int i = 1; i <= nb_chefs; i++) {
