@@ -6,8 +6,8 @@
 #define MIN_MECANOS 3
 #define MIN_OUTILS 1
 
-#define MAX_CHEFS 1000
-#define MAX_MECANOS 1000
+#define MAX_CHEFS 500
+#define MAX_MECANOS 500
 
 /* Fonction d'usage du programme */
 void usage(char *s) {
@@ -21,6 +21,34 @@ void usage(char *s) {
     exit(EXIT_FAILURE);
 }
 
+
+void lance_travailleurs(int nb, char *path, int argc, char *args[]) {
+    pid_t pid;
+
+    /* creation d'une string de taille optimale por sotcker l'ordre du travailleur */
+    int taille_ordre = ((int) log10((double) nb)) + 1;
+    char ordre[taille_ordre];
+
+    char *args_exec[4 + argc];
+    args_exec[0] = path;
+    for (int j = 0; j < argc; j++) {
+        args_exec[4 + j] = args[j];
+    }
+    args_exec[3 + argc] = NULL;
+
+    for(int i = 1; i <= nb; i++) {
+	    pid = fork();   
+        if (pid == -1) break;
+        if (pid == 0) {
+            sprintf(ordre, "%d", i);
+            args_exec[1] = ordre;
+            execv(path, args_exec);
+            exit(EXIT_FAILURE);
+        }
+    }
+    usleep(500000);
+}
+
 /* Fonction principale du programme */
 int main(int argc, char *argv[]) {
     int nb_chefs, nb_mecanos;
@@ -31,8 +59,6 @@ int main(int argc, char *argv[]) {
     key_t cle_mecano;
     int mem_part_mecano;
     int *tab;
-
-    pid_t pid_chef;
 
     /* Verficiation des parametres */
     if (argc < 3 + NB_OUTILS) {
@@ -86,26 +112,13 @@ int main(int argc, char *argv[]) {
     }
     
 
-    fprintf(stderr, "Allumage des fours ... !\n");
+    fprintf(stderr, "Allumage des fours\t\t");
+    lance_travailleurs(nb_chefs, "chef", NB_OUTILS, outils);
+    fprintf(stderr, "\tfours prêts !\n");
 
-    /* creation d'une string de taille optimale por sotcker l'ordre du chef */
-    int taille_nb = ((int) log10((double) nb_chefs)) + 1;
-    char nb_chef_str[taille_nb];
-
-    for(int i = 1; i <= nb_chefs; i++) {
-	    pid_chef = fork();   
-        if (pid_chef == -1) break;
-        if (pid_chef == 0) {
-            sprintf(nb_chef_str, "%d", i);
-            char *args_chef[4 + NB_OUTILS] = {"chef", nb_chef_str};
-            for (int j = 0; j < NB_OUTILS; j++) args_chef[4 + i] = outils[i];
-            args_chef[3 + NB_OUTILS] = NULL;
-            execv("chef", args_chef);
-            exit(EXIT_FAILURE);
-        }
-    }
-    usleep(500000);
-    fprintf(stderr, "... fours prêts !\n");
+    fprintf(stderr, "\nEchauffement des mecaniciens\t");
+    lance_travailleurs(nb_chefs, "chef", 0, NULL);
+    fprintf(stderr, "\tmecaniciens prêts !\n");
 
 
     /* On nettoie */
