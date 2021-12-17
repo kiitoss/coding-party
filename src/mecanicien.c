@@ -26,9 +26,9 @@ int main(int argc, char *argv[]) {
     
     printf(".");
 
-    printf("Attend travail type %d\n", ordre);
-    requete_t rep = attend_reponse(fm, ordre);
-    
+    printf("\t\t(%d) <-- Attend travail\n", ordre);
+    requete_mecano_t rep = fm_mecano_attend_reponse(fm, ordre);
+    printf("\t\t(%d) /!\\ Debut du travail\n", ordre);
     
     // if ((semop(semap, sops, nsops)) == -1) {
     //     fprintf(stderr, "(mecanicien) Operation sur semaphore echoue\n");
@@ -38,8 +38,8 @@ int main(int argc, char *argv[]) {
     usleep(rep.duree * 1000);
     
     
-    printf("Envoie requete fin travail\n");
-    envoie_requete(fm, ordre, 0);
+    printf("\t\t--> (%d) Envoie requete fin travail\n", ordre);
+    fm_mecano_envoie_requete(fm, ordre, 0);
 
     for (int i = 0; i < nsops; i++) {
         sops[i].sem_op = +1;

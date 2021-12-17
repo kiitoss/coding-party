@@ -11,7 +11,7 @@
 #define MAX_CHEFS 500
 #define MAX_MECANOS 500
 
-int fm, semap;
+int fm_mecano, semap, fm_client;
 
 /* Fonction d'usage du programme */
 void usage(char *s) {
@@ -29,7 +29,7 @@ void arret() {
     fprintf(stdout,"Le garage ferme ses portes.\n");
     killpg(0, SIGUSR1);
     semctl(semap, 1, IPC_RMID, NULL);
-    deconnexion_fm(fm);
+    deconnexion_fm(fm_mecano);
     exit(EXIT_FAILURE);
 }
 
@@ -40,7 +40,6 @@ void mon_sigaction(int signal, void (*f)(int)) {
     action.sa_flags = 0;
     sigaction(signal,&action,NULL);
 }
-
 
 int taille_int(int i) {
     return ((int) log10((double) i)) + 1;
@@ -77,7 +76,7 @@ void exec_travailleurs(int nb, char *path, int argc, char *argv[]) {
     usleep(500000);
 }
 
-void cree_clients(int nb_chefs) {
+void exec_client(int nb_chefs) {
     pid_t pid;
     
     /* creation d'une string de taille optimale por sotcker l'ordre du travailleur */
@@ -105,8 +104,9 @@ int main(int argc, char *argv[]) {
     int outils[NB_OUTILS];
     int param_valides = 1;
 
-    FILE *fich_cle;
+    
     key_t cle_mecano;
+    key_t cle_client;
 
     /* Verficiation des parametres */
     if (argc < 3 + NB_OUTILS) {
@@ -132,41 +132,13 @@ int main(int argc, char *argv[]) {
     if (!param_valides) usage(argv[0]);
 
 
-    /* Creation de la cle */
-    /* 1 - On teste si le fichier cle existe dans le repertoire courant */
-    fich_cle = fopen(FICHIER_CLE, "r");
-    if (fich_cle == NULL){
-        if (errno == ENOENT){
-            /* on le cree */
-            fich_cle = fopen(FICHIER_CLE, "w");
-            if (fich_cle == NULL){
-                fprintf(stderr, "Ouverture du garage impossible\n");
-                exit(EXIT_FAILURE);
-            }
-        } else {
-            fprintf(stderr, "Ouverture du garage impossible\n");
-            exit(EXIT_FAILURE);
-        }
-    }
-
-    cle_mecano = ftok(FICHIER_CLE, LETTRE_CODE_MECANO);
-    if (cle_mecano == -1) {
-	    fprintf(stderr, "(chef) Probleme creation cle\n");
-	    exit(EXIT_FAILURE);
-    }
-
-    /* Creation file de message */
-    fm = msgget(cle_mecano, IPC_CREAT | 0660);
-    if (fm == -1) {
-	    fprintf(stderr, "Probleme creation file de message\n");
-	    exit(EXIT_FAILURE);
-    }
+    init_fm(LETTRE_CODE_MECANO, &cle_mecano, &fm_mecano);
 
     /* On cree le semaphore (meme cle) */
     semap = semget(cle_mecano, NB_OUTILS, IPC_CREAT | 0660);
     if (semap == -1) {
 	    fprintf(stderr, "Probleme creation ensemble de semaphore ou il existe deja\n");
-	    deconnexion_fm(fm);
+	    deconnexion_fm(fm_mecano);
 	    exit(EXIT_FAILURE);
     }
 
@@ -175,9 +147,12 @@ int main(int argc, char *argv[]) {
 	    printf("Probleme initialisation semaphore\n");
 	    /* On detruit les IPC deje crees : */
         semctl(semap, 1, IPC_RMID, NULL);
-        deconnexion_fm(fm);
+        deconnexion_fm(fm_mecano);
         exit(EXIT_FAILURE);
     }
+
+
+    init_fm(LETTRE_CODE_CLIENT, &cle_client, &fm_client);
 
     mon_sigaction(SIGUSR1, arret);
 
@@ -190,7 +165,7 @@ int main(int argc, char *argv[]) {
     fprintf(stderr, "\tmecaniciens prêts !\n");
 
     
-    // cree_clients(nb_chefs);
+    exec_client(nb_chefs);
 
     return EXIT_SUCCESS;
 }

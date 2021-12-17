@@ -5,17 +5,16 @@ int main(int argc, char *argv[]) {
     int fm;
     key_t cle;
     int nb_chefs = atoi(argv[1]);
-
-    printf("Je suis un client, il y a %d chefs\n", nb_chefs);
+    requete_client_t rep;
+    pid_t pid = getpid();
     
     connexion_fm("client", LETTRE_CODE_CLIENT, &cle, &fm);
     
-    sleep(2);
+    printf("\t--> Client n°%d demande reparation\n", pid);
+    fm_client_envoie_requete(fm, REQUETE_TYPE_TRAVAIL, pid);
 
-    // envoie_requete(fm, ordre, duree);
-
-    // requete_t rep = attend_reponse(fm, ordre);
-    // printf("Retour du mecano %d\n", ordre);
+    rep = fm_client_attend_reponse(fm, pid);
+    printf("\t<-- Retour du chef au client %d\n", pid);
 
     exit(EXIT_SUCCESS);
 }
