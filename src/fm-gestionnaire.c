@@ -78,7 +78,7 @@ void fm_mecano_attend_requete(int fm, requete_mecano_t *req) {
     }
 }
 
-void fm_mecano_envoie_requete(int fm, long type_reponse, int duree, int outils[NB_OUTILS]) {
+void fm_mecano_envoie_requete(int fm, long type_reponse, int duree, unsigned short *outils) {
     requete_mecano_t requete;
 
     /* creation de la requete */

@@ -15,9 +15,9 @@ int main(int argc, char *argv[]) {
     long type_reponse_mecano = ordre + REQUETE_TYPE_TAF;
     int duree = rand() % 5000 + 5000;
 
-    int *outils = malloc(sizeof(int) * NB_OUTILS);
+    unsigned short *outils = malloc(sizeof(unsigned short) * NB_OUTILS);
 
-    for (int i = 0; i < NB_OUTILS; i++) outils[i] = atoi(argv[1 + i]);
+    for (int i = 0; i < NB_OUTILS; i++) outils[i] = atoi(argv[2 + i]);
     
 
     mon_sigaction(SIGUSR1, arret);

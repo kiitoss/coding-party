@@ -82,6 +82,7 @@ void exec_travailleurs(int nb, char *path, int argc, char *argv[]) {
         if (pid == 0) {
             sprintf(ordre, "%d", i);
             argv_exec[1] = ordre;
+
             execv(path, argv_exec);
             exit(EXIT_FAILURE);
         } else {
@@ -118,7 +119,7 @@ void exec_client(int nb_chefs) {
 int main(int argc, char *argv[]) {
     int nb_chefs, nb_mecanos;
     char *outils_str[NB_OUTILS];
-    int outils[NB_OUTILS];
+    unsigned short outils[NB_OUTILS];
     int param_valides = 1;
 
     
@@ -139,7 +140,7 @@ int main(int argc, char *argv[]) {
     if (nb_mecanos > MAX_MECANOS) nb_mecanos = MAX_MECANOS;
 
     for (int i = 0; i < NB_OUTILS; i++) {
-        outils_str[i] = argv[3+i];
+        outils_str[i] = argv[3 + i];
         outils[i] = atoi(outils_str[i]);
         if (outils[i] < MIN_OUTILS) {
             param_valides = 0;
@@ -160,10 +161,10 @@ int main(int argc, char *argv[]) {
     }
 
     /* On l'initialise */
-    if (semctl(semap, 1, SETALL, outils) == -1) {
-	    printf("Probleme initialisation semaphore\n");
+    if (semctl(semap, 0, SETALL, outils) == -1) {
+	    fprintf(stderr, "Probleme initialisation semaphore\n");
 	    /* On detruit les IPC deje crees : */
-        semctl(semap, 1, IPC_RMID, NULL);
+        semctl(semap, 0, IPC_RMID, NULL);
         deconnexion_fm(fm_mecano);
         exit(EXIT_FAILURE);
     }

@@ -13,7 +13,7 @@ typedef struct {
     long type;
     long type_reponse;
     int duree;
-    int outils[NB_OUTILS];
+    unsigned short outils[NB_OUTILS];
 } requete_mecano_t;
 
 typedef struct {
@@ -31,7 +31,7 @@ void connexion_fm(char *type_personne, char code, key_t *cle, int *fm);
 
 void deconnexion_fm(int fm);
 
-void fm_mecano_envoie_requete(int fm, long type_reponse, int duree, int *outils);
+void fm_mecano_envoie_requete(int fm, long type_reponse, int duree, unsigned short *outils);
 
 void fm_mecano_envoie_reponse(int fm, long type);
 
