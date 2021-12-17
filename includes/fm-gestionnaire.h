@@ -4,12 +4,13 @@
 #define LETTRE_CODE_MECANO 'm'
 #define LETTRE_CODE_CLIENT 'c'
 
-#define REQUETE_TYPE_TRAVAIL 1
+#define REQUETE_TYPE_TRAVAIL 0
 
 typedef struct {
     long type;
     int duree;
     int outils[NB_OUTILS];
+    int ordre_mecano;
 } requete_mecano_t;
 
 typedef struct {
@@ -23,7 +24,7 @@ void connexion_fm(char *type_personne, char code, key_t *cle, int *fm);
 
 void deconnexion_fm(int fm);
 
-void fm_mecano_envoie_requete(int fm, int ordre_exp, int duree);
+void fm_mecano_envoie_requete(int fm, int ordre_exp, int duree, int ordre_mecano);
 
 requete_mecano_t fm_mecano_attend_reponse(int fm, int ordre_exp);
 

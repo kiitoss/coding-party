@@ -26,6 +26,9 @@ int main(int argc, char *argv[]) {
     
     printf(".");
 
+    printf("\t\t--> (%d) Envoie requete dispo\n", ordre);
+    fm_mecano_envoie_requete(fm, REQUETE_TYPE_TRAVAIL, 0, ordre);
+
     printf("\t\t(%d) <-- Attend travail\n", ordre);
     requete_mecano_t rep = fm_mecano_attend_reponse(fm, ordre);
     printf("\t\t(%d) /!\\ Debut du travail\n", ordre);
@@ -39,7 +42,7 @@ int main(int argc, char *argv[]) {
     
     
     printf("\t\t--> (%d) Envoie requete fin travail\n", ordre);
-    fm_mecano_envoie_requete(fm, ordre, 0);
+    fm_mecano_envoie_requete(fm, ordre, 0, 0);
 
     for (int i = 0; i < nsops; i++) {
         sops[i].sem_op = +1;

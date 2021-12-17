@@ -16,11 +16,17 @@ int main(int argc, char *argv[]) {
 
     printf(".");
 
+    if (ordre == 1 || ordre == 3) {
+        sleep(3);
+    }
     printf("<-- Chef n°%d: attente client.\n", ordre);
     rep_client = fm_client_attend_reponse(fm_client, REQUETE_TYPE_TRAVAIL);
+
+    printf("<-- Chef n°%d: attente mecano.\n", ordre);
+    rep_mecano = fm_mecano_attend_reponse(fm_mecano, REQUETE_TYPE_TRAVAIL);
     
-    printf("--> Envoie requete mecano %d / %d\n", ordre, duree);
-    fm_mecano_envoie_requete(fm_mecano, ordre, duree);
+    printf("--> Envoie requete mecano %d / %d\n", rep_mecano.ordre_mecano, duree);
+    fm_mecano_envoie_requete(fm_mecano, rep_mecano.ordre_mecano, duree, 0);
 
     rep_mecano = fm_mecano_attend_reponse(fm_mecano, ordre);
     printf("<-- Retour du mecano %d\n", ordre);

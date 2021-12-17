@@ -66,12 +66,13 @@ void deconnexion_fm(int fm) {
 }
 
 
-void fm_mecano_envoie_requete(int fm, int ordre_exp, int duree) {
+void fm_mecano_envoie_requete(int fm, int ordre_exp, int duree, int ordre_mecano) {
     requete_mecano_t requete;
 
     /* creation de la requete */
-    requete.type = ordre_exp;
+    requete.type = ordre_exp + 1;
     requete.duree = duree;
+    requete.ordre_mecano = ordre_mecano;
     
     /* envoi de la requete */
     msgsnd(fm, &requete, sizeof(requete_mecano_t), 0);
@@ -83,7 +84,7 @@ requete_mecano_t fm_mecano_attend_reponse(int fm, int ordre_exp) {
     int res_rcv;
 
     /* attente de la reponse */
-    res_rcv = msgrcv(fm, &reponse, sizeof(requete_mecano_t), ordre_exp, 0);
+    res_rcv = msgrcv(fm, &reponse, sizeof(requete_mecano_t), ordre_exp + 1, 0);
     if (res_rcv == -1) {
 	    fprintf(stderr, "Erreur, numero %d\n", errno);
 	    exit(EXIT_FAILURE);
@@ -97,7 +98,7 @@ void fm_client_envoie_requete(int fm, int type, int pid_client) {
     requete_client_t requete;
 
     /* creation de la requete */
-    requete.type = type;
+    requete.type = type + 1;
     requete.pid_client = pid_client;
     
     /* envoi de la requete */
@@ -110,7 +111,7 @@ requete_client_t fm_client_attend_reponse(int fm, int msgtyp) {
     int res_rcv;
 
     /* attente de la reponse */
-    res_rcv = msgrcv(fm, &reponse, sizeof(requete_client_t), msgtyp, 0);
+    res_rcv = msgrcv(fm, &reponse, sizeof(requete_client_t), msgtyp + 1, 0);
     if (res_rcv == -1) {
 	    fprintf(stderr, "Erreur, numero %d\n", errno);
 	    exit(EXIT_FAILURE);
