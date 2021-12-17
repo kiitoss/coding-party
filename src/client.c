@@ -3,6 +3,8 @@
 #include "../includes/sigaction-gestionnaire.h"
 
 void travail_termine() {
+    couleur(VERT);
+    fprintf(stdout, "Client n°%d: Quitte l'etablissement", getpid());
     exit(EXIT_SUCCESS);
 }
 
@@ -18,7 +20,8 @@ int main(int argc, char *argv[]) {
     
     connexion_fm("client", LETTRE_CODE_CLIENT, &cle, &fm);
     
-    printf("\t--> Client n°%d demande reparation\n", pid);
+    couleur(VERT);
+    fprintf(stdout, "Client n°%d: Apporte une nouvelle voiture\n", pid);
     fm_client_envoie_requete(fm, pid);
 
     pause();

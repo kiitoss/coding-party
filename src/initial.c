@@ -29,8 +29,9 @@ void usage(char *s) {
 
 void arret_general() {
     struct pid_fils *tmp;
-    
-    fprintf(stdout,"Le garage ferme ses portes.\n");
+    couleur(BLANC);
+    fprintf(stdout,"\nLE GARAGE FERME SES PORTES\n");
+    fprintf(stdout,"  =======================\n");
 
     while (fils != NULL) {
         tmp = fils;
@@ -43,6 +44,8 @@ void arret_general() {
 
     deconnexion_fm(fm_mecano);
     deconnexion_fm(fm_client);
+
+    couleur(REINIT);
 
     exit(EXIT_SUCCESS);
 }
@@ -174,13 +177,16 @@ int main(int argc, char *argv[]) {
 
     mon_sigaction(SIGUSR1, arret_general);
 
-    fprintf(stderr, "Allumage des fours\t\t");
+    couleur(BLANC);
+    fprintf(stdout, "\nOUVERTURE DU GARAGE\n");
+    fprintf(stdout, "   ================\n");
+
     exec_travailleurs(nb_chefs, "chef", NB_OUTILS, outils_str);
-    fprintf(stderr, "\tfours prêts !\n");
-    
-    fprintf(stderr, "\nEchauffement des mecaniciens\t");
     exec_travailleurs(nb_mecanos, "mecanicien", 0, NULL);
-    fprintf(stderr, "\tmecaniciens prêts !\n");
+
+    couleur(BLANC);
+    fprintf(stdout, "\nLE GARAGE EST OUVERT\n");
+    fprintf(stdout, "   ================\n");
 
     
     exec_client(nb_chefs);

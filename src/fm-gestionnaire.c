@@ -92,11 +92,8 @@ void fm_mecano_envoie_requete(int fm, long type_reponse, int duree, unsigned sho
 }
 
 void fm_mecano_attend_reponse(int fm, long type_reponse, reponse_mecano_t *rep) {
-    int res_rcv;
-
     /* attente de la reponse */
-    res_rcv = msgrcv(fm, rep, sizeof(reponse_mecano_t), type_reponse, 0);
-    if (res_rcv == -1) {
+    if (msgrcv(fm, rep, sizeof(reponse_mecano_t), type_reponse, 0) == -1) {
 	    fprintf(stderr, "Erreur reponse mecano, numero %d\n", errno);
 	    exit(EXIT_FAILURE);
     }

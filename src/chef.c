@@ -27,18 +27,30 @@ int main(int argc, char *argv[]) {
     connexion_fm("chef", LETTRE_CODE_CLIENT, &cle_client, &fm_client);
 
 
-    printf("<-- Chef n°%d: attente client.\n", ordre);
-    fm_client_attend_requete(fm_client, &req_client);
-    
-    printf("--> Envoie requete aux mecanos\n");
-    fm_mecano_envoie_requete(fm_mecano, type_reponse_mecano, duree, outils);
-    
-    fm_mecano_attend_reponse(fm_mecano, type_reponse_mecano, &rep_mecano);
-    printf("<-- Retour du mecano %d\n", ordre);
+    for (;;) {
+        couleur(ROUGE);
+        fprintf(stdout, "Chef n°%d: Disponible\n", ordre);
+        
+        fm_client_attend_requete(fm_client, &req_client);
 
-    printf("<-- Retour au client %d\n", req_client.pid_client);
-    kill(req_client.pid_client, SIGUSR2);
+        couleur(ROUGE);
+        fprintf(stdout, "Chef n°%d: Reçoit une demande du client n°%d\n", ordre, req_client.pid_client);
+        
+        couleur(ROUGE);
+        fprintf(stdout, "Chef n°%d: Envoie requete aux mecanos\n", ordre);
+        fm_mecano_envoie_requete(fm_mecano, type_reponse_mecano, duree, outils);
+        
+        
+        fm_mecano_attend_reponse(fm_mecano, type_reponse_mecano, &rep_mecano);
+        couleur(ROUGE);
+        fprintf(stdout, "Chef n°%d: Recoit la reponse du mecano\n", ordre);
 
+        couleur(ROUGE);
+        fprintf(stdout, "Chef n°%d: Retour au client n°%d\n", ordre, req_client.pid_client);
+        kill(req_client.pid_client, SIGUSR2);
+    }
+
+    free(outils);
 
     exit(EXIT_SUCCESS);
 }
