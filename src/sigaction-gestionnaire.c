@@ -11,3 +11,13 @@ void mon_sigaction(int signal, void (*f)(int)) {
     action.sa_flags = 0;
     sigaction(signal,&action,NULL);
 }
+
+void desactive_signaux() {
+    sigset_t masque;
+
+    sigfillset(&masque);
+    sigprocmask(SIG_SETMASK, &masque, NULL);
+
+    sigdelset(&masque, SIGUSR1);
+    sigprocmask(SIG_SETMASK, &masque, NULL);
+}

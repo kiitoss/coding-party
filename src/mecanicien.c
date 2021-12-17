@@ -27,6 +27,8 @@ int main(int argc, char *argv[]) {
 
     if (argc != 2) exit(EXIT_FAILURE);
 
+    desactive_signaux();
+    
     mon_sigaction(SIGUSR1, arret);
     
     connexion_fm("mecanicien", LETTRE_CODE_MECANO, &cle, &fm);

@@ -4,8 +4,8 @@
 
 int main(int argc, char *argv[]) {
     if (argc != 2 + NB_OUTILS) exit(EXIT_FAILURE);
-    
-    srand(getpid());  
+
+    srand(getpid());
 
     requete_client_t req_client;
     reponse_mecano_t rep_mecano;
@@ -22,6 +22,7 @@ int main(int argc, char *argv[]) {
     for (int i = 0; i < NB_OUTILS; i++) outils[i] = atoi(argv[2 + i]);
     
 
+    desactive_signaux();
     mon_sigaction(SIGUSR1, arret);
     
 

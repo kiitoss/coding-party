@@ -9,4 +9,6 @@ void arret();
 
 void mon_sigaction(int signal, void (*f)(int));
 
+void desactive_signaux();
+
 #endif

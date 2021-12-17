@@ -14,6 +14,7 @@
 #define MAX_MECANOS 500
 
 int fm_mecano, semap_fm_mecano, fm_client, smp, semap_smp;
+int *tab;
 
 struct pid_fils *fils = NULL;
 
@@ -45,7 +46,7 @@ void arret_general() {
     deconnexion_fm(fm_mecano);
     deconnexion_semap(semap_fm_mecano);
     deconnexion_fm(fm_client);
-    deconnexion_fm(smp);
+    deconnexion_smp(tab, smp);
     deconnexion_semap(semap_smp);
 
     couleur(REINIT);
@@ -126,9 +127,8 @@ void init_ipcs(int nb_chefs, unsigned short *outils) {
     key_t cle_mecano;
     key_t cle_client;
 
-    int *tab = malloc(sizeof(int) * nb_chefs);
-
     unsigned short val_init_semap_client[1]={1};
+    tab = malloc(sizeof(int) * nb_chefs);
 
     init_fm(LETTRE_CODE_MECANO, &cle_mecano, &fm_mecano);
     if (fm_mecano == -1) {
@@ -165,7 +165,7 @@ void init_ipcs(int nb_chefs, unsigned short *outils) {
         deconnexion_fm(fm_mecano);
         deconnexion_semap(semap_fm_mecano);
         deconnexion_fm(fm_client);
-        deconnexion_fm(smp);
+        deconnexion_smp(tab, smp);
         exit(EXIT_FAILURE);
     }
 
@@ -194,7 +194,6 @@ int main(int argc, char *argv[]) {
     char *outils_str[NB_OUTILS];
     unsigned short outils[NB_OUTILS];
     int param_valides = 1;
-    sigset_t mask;
 
 
     /* Verficiation des parametres */
@@ -220,11 +219,7 @@ int main(int argc, char *argv[]) {
     }
     if (!param_valides) usage(argv[0]);
 
-    sigfillset(&mask);
-    sigprocmask(SIG_SETMASK, &mask, NULL);
-
-    sigdelset(&mask, SIGUSR1);
-    sigprocmask(SIG_SETMASK, &mask, NULL);
+    desactive_signaux();
 
     mon_sigaction(SIGUSR1, arret_general);
 
