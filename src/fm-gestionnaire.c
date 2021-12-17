@@ -62,7 +62,6 @@ void connexion_fm(char *type_personne, char code, key_t *cle, int *fm) {
 
 void deconnexion_fm(int fm) {
     msgctl(fm, IPC_RMID, NULL);
-    execl("ipcrm", "ipcrm", "-a", NULL);
 }
 
 

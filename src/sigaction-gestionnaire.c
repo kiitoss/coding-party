@@ -1,7 +1,6 @@
 #include "../includes/sigaction-gestionnaire.h"
 
 void arret() {    
-    fprintf(stdout,"Arret.\n");
     exit(EXIT_FAILURE);
 }
 

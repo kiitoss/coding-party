@@ -1,3 +1,6 @@
+#ifndef FM_GESTIONNAIRE_H
+#define GM_GESTIONNAIRE_H
+
 #include "global.h"
 
 #define FICHIER_CLE "cle.serv"
@@ -31,3 +34,5 @@ requete_mecano_t fm_mecano_attend_reponse(int fm, int ordre_exp);
 void fm_client_envoie_requete(int fm, int type, pid_t pid_client);
 
 requete_client_t fm_client_attend_reponse(int fm, int msgtyp);
+
+#endif
