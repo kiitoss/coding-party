@@ -11,7 +11,7 @@
 
 typedef struct {
     long type;
-    int type_reponse;
+    long type_reponse;
     int duree;
     int outils[NB_OUTILS];
 } requete_mecano_t;
@@ -25,30 +25,22 @@ typedef struct {
     pid_t pid_client;
 } requete_client_t;
 
-typedef struct {
-    long type;
-} reponse_client_t;
-
 void init_fm(char code, key_t *cle, int *fm);
 
 void connexion_fm(char *type_personne, char code, key_t *cle, int *fm);
 
 void deconnexion_fm(int fm);
 
-void fm_mecano_envoie_requete(int fm, int type_reponse, int duree, int outils[NB_OUTILS]);
+void fm_mecano_envoie_requete(int fm, long type_reponse, int duree, int *outils);
 
 void fm_mecano_envoie_reponse(int fm, long type);
 
-requete_mecano_t fm_mecano_attend_requete(int fm);
+void fm_mecano_attend_requete(int fm, requete_mecano_t *req);
 
-reponse_mecano_t fm_mecano_attend_reponse(int fm, long type);
+void fm_mecano_attend_reponse(int fm, long type_reponse, reponse_mecano_t *rep);
 
 void fm_client_envoie_requete(int fm, pid_t pid_client);
 
-void fm_client_envoie_reponse(int fm, long type);
-
-requete_client_t fm_client_attend_requete(int fm);
-
-reponse_client_t fm_client_attend_reponse(int fm, int type_reponse);
+void fm_client_attend_requete(int fm, requete_client_t *req);
 
 #endif

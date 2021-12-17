@@ -2,7 +2,6 @@
 #include "../includes/fm-gestionnaire.h"
 #include "../includes/sigaction-gestionnaire.h"
 
-
 int main(int argc, char *argv[]) {
     int ordre = atoi(argv[1]);
     int fm;
@@ -32,23 +31,27 @@ int main(int argc, char *argv[]) {
     printf(".");
 
     printf("\t\t(%d) <-- Attend travail\n", ordre);
-    requete_mecano_t req = fm_mecano_attend_requete(fm);
-    printf("\t\t(%d) /!\\ Debut du travail\n", ordre);
+    requete_mecano_t requete;
+    fm_mecano_attend_requete(fm, &requete);
+
+    printf("\t\t(%d) /!\\ Debut du travail: outils: ", ordre);
+    for (int i=0; i < NB_OUTILS; i++) printf("%d ", requete.outils[i]);
+    printf("\n");
     
     // if ((semop(semap, sops, nsops)) == -1) {
     //     fprintf(stderr, "(mecanicien) Operation sur semaphore echoue\n");
     //     exit(EXIT_FAILURE);
     // }
     
-    usleep(req.duree * 1000);
+    usleep(requete.duree * 1000);
     
     
     printf("\t\t--> (%d) Envoie requete fin travail\n", ordre);
-    fm_mecano_envoie_reponse(fm, req.type_reponse);
+    fm_mecano_envoie_reponse(fm, requete.type_reponse);
 
-    for (int i = 0; i < nsops; i++) {
-        sops[i].sem_op = +1;
-    }
+    // for (int i = 0; i < nsops; i++) {
+    //     sops[i].sem_op = +1;
+    // }
 
     // if ((semop(semap, sops, nsops)) == -1) {
     //     fprintf(stderr, "(mecanicien) Operation sur semaphore echoue\n");

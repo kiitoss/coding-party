@@ -15,7 +15,7 @@ chef : src/chef.c src/fm-gestionnaire.c includes/global.h includes/fm-gestionnai
 mecanicien : src/mecanicien.c src/fm-gestionnaire.c includes/global.h includes/fm-gestionnaire.h includes/sigaction-gestionnaire.h
 	$(CC) $(OPTIONS) src/mecanicien.c src/fm-gestionnaire.c src/sigaction-gestionnaire.c -o mecanicien
 
-client : src/client.c includes/global.h includes/fm-gestionnaire.h includes/sigaction-gestionnaire.h
+client : src/client.c src/fm-gestionnaire.c includes/global.h includes/fm-gestionnaire.h includes/sigaction-gestionnaire.h
 	$(CC) $(OPTIONS) src/client.c src/fm-gestionnaire.c src/sigaction-gestionnaire.c -o client
 
 
