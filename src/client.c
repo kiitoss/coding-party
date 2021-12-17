@@ -1,5 +1,6 @@
 #include "../includes/global.h"
 #include "../includes/fm-gestionnaire.h"
+#include "../includes/sigaction-gestionnaire.h"
 
 int main(int argc, char *argv[]) {
     int fm;
@@ -7,6 +8,8 @@ int main(int argc, char *argv[]) {
     int nb_chefs = atoi(argv[1]);
     requete_client_t rep;
     pid_t pid = getpid();
+
+    mon_sigaction(SIGUSR1, arret);
     
     connexion_fm("client", LETTRE_CODE_CLIENT, &cle, &fm);
     

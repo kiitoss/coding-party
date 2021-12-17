@@ -1,5 +1,7 @@
 #include "../includes/global.h"
 #include "../includes/fm-gestionnaire.h"
+#include "../includes/sigaction-gestionnaire.h"
+
 
 int main(int argc, char *argv[]) {
     int ordre = atoi(argv[1]);
@@ -8,6 +10,9 @@ int main(int argc, char *argv[]) {
 
     int nsops = NB_OUTILS;
     struct sembuf *sops = (struct sembuf *) malloc(nsops * sizeof(struct sembuf)); 
+
+
+    mon_sigaction(SIGUSR1, arret);
 
     for (int i = 0; i < nsops; i++) {
         sops[i].sem_num = i;

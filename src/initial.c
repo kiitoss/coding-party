@@ -1,8 +1,8 @@
 #include <math.h>
-#include <signal.h>
 
 #include "../includes/global.h"
 #include "../includes/fm-gestionnaire.h"
+#include "../includes/sigaction-gestionnaire.h"
 
 #define MIN_CHEFS 2
 #define MIN_MECANOS 3
@@ -12,6 +12,8 @@
 #define MAX_MECANOS 500
 
 int fm_mecano, semap, fm_client;
+
+struct pid_fils *fils = NULL;
 
 /* Fonction d'usage du programme */
 void usage(char *s) {
@@ -25,24 +27,35 @@ void usage(char *s) {
     exit(EXIT_FAILURE);
 }
 
-void arret() {
+void arret_general() {
+    struct pid_fils *tmp;
+    
     fprintf(stdout,"Le garage ferme ses portes.\n");
-    killpg(0, SIGUSR1);
-    semctl(semap, 1, IPC_RMID, NULL);
-    deconnexion_fm(fm_mecano);
-    exit(EXIT_FAILURE);
-}
 
-void mon_sigaction(int signal, void (*f)(int)) {
-    struct sigaction action;
-    action.sa_handler = f;
-    sigemptyset(&action.sa_mask);
-    action.sa_flags = 0;
-    sigaction(signal,&action,NULL);
+    while (fils != NULL) {
+        tmp = fils;
+        fils = fils->suivant;
+        kill(tmp->pid, SIGUSR1);
+        free(tmp);
+    }
+    
+    semctl(semap, 1, IPC_RMID, NULL);
+
+    deconnexion_fm(fm_mecano);
+    deconnexion_fm(fm_client);
+
+    exit(EXIT_SUCCESS);
 }
 
 int taille_int(int i) {
     return ((int) log10((double) i)) + 1;
+}
+
+void nouveau_fils(pid_t pid) {
+    struct pid_fils *nouveau = malloc(sizeof(struct pid_fils));
+    nouveau->pid = pid;
+    nouveau->suivant = fils;
+    fils = nouveau;
 }
 
 void exec_travailleurs(int nb, char *path, int argc, char *argv[]) {
@@ -71,6 +84,8 @@ void exec_travailleurs(int nb, char *path, int argc, char *argv[]) {
             argv_exec[1] = ordre;
             execv(path, argv_exec);
             exit(EXIT_FAILURE);
+        } else {
+            nouveau_fils(pid);
         }
     }
     usleep(500000);
@@ -91,6 +106,8 @@ void exec_client(int nb_chefs) {
         if (pid == 0) {
             execl("client", "client", nb_chefs_str, NULL);
             exit(EXIT_FAILURE);
+        } else {
+            nouveau_fils(pid);
         }
 
         sleep(2);
@@ -154,7 +171,7 @@ int main(int argc, char *argv[]) {
 
     init_fm(LETTRE_CODE_CLIENT, &cle_client, &fm_client);
 
-    mon_sigaction(SIGUSR1, arret);
+    mon_sigaction(SIGUSR1, arret_general);
 
     fprintf(stderr, "Allumage des fours\t\t");
     exec_travailleurs(nb_chefs, "chef", NB_OUTILS, outils_str);
