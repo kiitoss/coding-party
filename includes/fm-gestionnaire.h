@@ -7,19 +7,27 @@
 #define LETTRE_CODE_MECANO 'm'
 #define LETTRE_CODE_CLIENT 'c'
 
-#define REQUETE_TYPE_TRAVAIL 0
+#define REQUETE_TYPE_TAF 1
 
 typedef struct {
     long type;
+    int type_reponse;
     int duree;
     int outils[NB_OUTILS];
-    int ordre_mecano;
 } requete_mecano_t;
+
+typedef struct {
+    long type;
+} reponse_mecano_t;
 
 typedef struct {
     long type;
     pid_t pid_client;
 } requete_client_t;
+
+typedef struct {
+    long type;
+} reponse_client_t;
 
 void init_fm(char code, key_t *cle, int *fm);
 
@@ -27,12 +35,20 @@ void connexion_fm(char *type_personne, char code, key_t *cle, int *fm);
 
 void deconnexion_fm(int fm);
 
-void fm_mecano_envoie_requete(int fm, int ordre_exp, int duree, int ordre_mecano);
+void fm_mecano_envoie_requete(int fm, int type_reponse, int duree, int outils[NB_OUTILS]);
 
-requete_mecano_t fm_mecano_attend_reponse(int fm, int ordre_exp);
+void fm_mecano_envoie_reponse(int fm, long type);
 
-void fm_client_envoie_requete(int fm, int type, pid_t pid_client);
+requete_mecano_t fm_mecano_attend_requete(int fm);
 
-requete_client_t fm_client_attend_reponse(int fm, int msgtyp);
+reponse_mecano_t fm_mecano_attend_reponse(int fm, long type);
+
+void fm_client_envoie_requete(int fm, pid_t pid_client);
+
+void fm_client_envoie_reponse(int fm, long type);
+
+requete_client_t fm_client_attend_requete(int fm);
+
+reponse_client_t fm_client_attend_reponse(int fm, int type_reponse);
 
 #endif

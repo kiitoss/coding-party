@@ -65,25 +65,50 @@ void deconnexion_fm(int fm) {
 }
 
 
-void fm_mecano_envoie_requete(int fm, int ordre_exp, int duree, int ordre_mecano) {
+void fm_mecano_envoie_requete(int fm, int type_reponse, int duree, int outils[NB_OUTILS]) {
     requete_mecano_t requete;
 
     /* creation de la requete */
-    requete.type = ordre_exp + 1;
+    requete.type = REQUETE_TYPE_TAF;
+    requete.type_reponse = type_reponse;
     requete.duree = duree;
-    requete.ordre_mecano = ordre_mecano;
+    for (int i = 0; i < NB_OUTILS; i++) requete.outils[i] = outils[i];
     
     /* envoi de la requete */
     msgsnd(fm, &requete, sizeof(requete_mecano_t), 0);
 }
 
+void fm_mecano_envoie_reponse(int fm, long type) {
+    reponse_mecano_t reponse;
 
-requete_mecano_t fm_mecano_attend_reponse(int fm, int ordre_exp) {
-    requete_mecano_t reponse;
+    /* creation de la reponse */
+    reponse.type = type;
+    
+    /* envoi de la reponse */
+    msgsnd(fm, &reponse, sizeof(reponse_mecano_t), 0);
+}
+
+
+requete_mecano_t fm_mecano_attend_requete(int fm) {
+    requete_mecano_t requete;
+    int res_rcv;
+
+    /* attente de la requete */
+    res_rcv = msgrcv(fm, &requete, sizeof(requete_mecano_t), REQUETE_TYPE_TAF, 0);
+    if (res_rcv == -1) {
+	    fprintf(stderr, "Erreur, numero %d\n", errno);
+	    exit(EXIT_FAILURE);
+    }
+
+    return requete;
+}
+
+reponse_mecano_t fm_mecano_attend_reponse(int fm, long type) {
+    reponse_mecano_t reponse;
     int res_rcv;
 
     /* attente de la reponse */
-    res_rcv = msgrcv(fm, &reponse, sizeof(requete_mecano_t), ordre_exp + 1, 0);
+    res_rcv = msgrcv(fm, &reponse, sizeof(reponse_mecano_t), type, 0);
     if (res_rcv == -1) {
 	    fprintf(stderr, "Erreur, numero %d\n", errno);
 	    exit(EXIT_FAILURE);
@@ -92,25 +117,47 @@ requete_mecano_t fm_mecano_attend_reponse(int fm, int ordre_exp) {
     return reponse;
 }
 
-
-void fm_client_envoie_requete(int fm, int type, int pid_client) {
+void fm_client_envoie_requete(int fm, pid_t pid_client) {
     requete_client_t requete;
 
     /* creation de la requete */
-    requete.type = type + 1;
+    requete.type = REQUETE_TYPE_TAF;
     requete.pid_client = pid_client;
     
     /* envoi de la requete */
     msgsnd(fm, &requete, sizeof(requete_client_t), 0);
 }
 
+void fm_client_envoie_reponse(int fm, long type) {
+    reponse_client_t reponse;
 
-requete_client_t fm_client_attend_reponse(int fm, int msgtyp) {
-    requete_client_t reponse;
+    /* creation de la reponse */
+    reponse.type = type;
+    
+    /* envoi de la reponse */
+    msgsnd(fm, &reponse, sizeof(reponse_client_t), 0);
+}
+
+requete_client_t fm_client_attend_requete(int fm) {
+    requete_client_t requete;
+    int res_rcv;
+
+    /* attente de la requete */
+    res_rcv = msgrcv(fm, &requete, sizeof(requete_client_t), REQUETE_TYPE_TAF, 0);
+    if (res_rcv == -1) {
+	    fprintf(stderr, "Erreur, numero %d\n", errno);
+	    exit(EXIT_FAILURE);
+    }
+
+    return requete;
+}
+
+reponse_client_t fm_client_attend_reponse(int fm, int type_reponse) {
+    reponse_client_t reponse;
     int res_rcv;
 
     /* attente de la reponse */
-    res_rcv = msgrcv(fm, &reponse, sizeof(requete_client_t), msgtyp + 1, 0);
+    res_rcv = msgrcv(fm, &reponse, sizeof(reponse_client_t), type_reponse, 0);
     if (res_rcv == -1) {
 	    fprintf(stderr, "Erreur, numero %d\n", errno);
 	    exit(EXIT_FAILURE);

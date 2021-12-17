@@ -6,8 +6,10 @@ int main(int argc, char *argv[]) {
     int fm_mecano, fm_client;
     key_t cle_mecano, cle_client;
     int ordre = atoi(argv[1]);
-    requete_mecano_t rep_mecano;
-    requete_client_t rep_client;
+    reponse_mecano_t rep_mecano;
+    requete_client_t req_client;
+
+    int type_reponse_mecano = ordre + 1;
     
     mon_sigaction(SIGUSR1, arret);
     
@@ -16,6 +18,8 @@ int main(int argc, char *argv[]) {
 
     srand(getpid());
     int duree = rand() % 5000 + 5000;
+    int outils[NB_OUTILS];
+    for (int i = 0; i < NB_OUTILS; i++) outils[i] = 1;
 
     printf(".");
 
@@ -23,19 +27,16 @@ int main(int argc, char *argv[]) {
         sleep(3);
     }
     printf("<-- Chef n°%d: attente client.\n", ordre);
-    rep_client = fm_client_attend_reponse(fm_client, REQUETE_TYPE_TRAVAIL);
-
-    printf("<-- Chef n°%d: attente mecano.\n", ordre);
-    rep_mecano = fm_mecano_attend_reponse(fm_mecano, REQUETE_TYPE_TRAVAIL);
+    req_client = fm_client_attend_requete(fm_client);
     
-    printf("--> Envoie requete mecano %d / %d\n", rep_mecano.ordre_mecano, duree);
-    fm_mecano_envoie_requete(fm_mecano, rep_mecano.ordre_mecano, duree, 0);
+    printf("--> Envoie requete aux mecanos\n");
+    fm_mecano_envoie_requete(fm_mecano, type_reponse_mecano, duree, outils);
 
-    rep_mecano = fm_mecano_attend_reponse(fm_mecano, ordre);
+    rep_mecano = fm_mecano_attend_reponse(fm_mecano, type_reponse_mecano);
     printf("<-- Retour du mecano %d\n", ordre);
 
-    printf("<-- Retour au client %d\n", rep_client.pid_client);
-    fm_client_envoie_requete(fm_client, rep_client.pid_client, rep_client.pid_client);
+    printf("<-- Retour au client %d\n", req_client.pid_client);
+    fm_client_envoie_reponse(fm_client, req_client.pid_client);
 
     exit(EXIT_SUCCESS);
 }
