@@ -1,6 +1,6 @@
 CC = gcc
 OPTIONS = -W -Wall
-IPCS = fm-gestionnaire.o smp-gestionnaire.o semap-gestionnaire.o sigaction-gestionnaire.o
+IPCS = fm-gestionnaire.o semap-gestionnaire.o sigaction-gestionnaire.o
 
 all: coding-party
 
@@ -22,9 +22,6 @@ client: src/client.c includes/global.h ${IPCS}
 
 fm-gestionnaire.o: src/fm-gestionnaire.c includes/fm-gestionnaire.h
 	$(CC) $(OPTIONS) src/fm-gestionnaire.c -c
-
-smp-gestionnaire.o: src/smp-gestionnaire.c includes/smp-gestionnaire.h
-	$(CC) $(OPTIONS) src/smp-gestionnaire.c -c
 
 semap-gestionnaire.o: src/semap-gestionnaire.c includes/semap-gestionnaire.h
 	$(CC) $(OPTIONS) src/semap-gestionnaire.c -c

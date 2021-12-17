@@ -3,7 +3,6 @@
 #include "../includes/global.h"
 #include "../includes/fm-gestionnaire.h"
 #include "../includes/sigaction-gestionnaire.h"
-#include "../includes/smp-gestionnaire.h"
 #include "../includes/semap-gestionnaire.h"
 
 #define MIN_CHEFS 2
@@ -13,7 +12,7 @@
 #define MAX_CHEFS 500
 #define MAX_MECANOS 500
 
-int fm_mecano, semap_fm_mecano, fm_client, smp, semap_smp;
+int fm_mecano, semap_fm_mecano, fm_client;
 int *tab;
 
 struct pid_fils *fils = NULL;
@@ -46,8 +45,6 @@ void arret_general() {
     deconnexion_fm(fm_mecano);
     deconnexion_semap(semap_fm_mecano);
     deconnexion_fm(fm_client);
-    deconnexion_smp(tab, smp);
-    deconnexion_semap(semap_smp);
 
     couleur(REINIT);
 
@@ -111,16 +108,12 @@ void exec_client(int nb_chefs) {
     char fm_client_str[taille_fm_client_str];
     sprintf(fm_client_str, "%d", fm_client);
 
-    int taille_smp = taille_int(smp);
-    char smp_str[taille_smp];
-    sprintf(smp_str, "%d", smp);
-
     for(;;) {
         pid = fork(); 
          
         if (pid == -1) break;
         if (pid == 0) {
-            execl("client", "client", nb_chefs_str, fm_client_str, smp_str, NULL);
+            execl("client", "client", nb_chefs_str, fm_client_str, NULL);
             exit(EXIT_FAILURE);
         } else {
             nouveau_fils(pid);
@@ -131,12 +124,9 @@ void exec_client(int nb_chefs) {
 }
 
 
-void init_ipcs(int nb_chefs, unsigned short *outils) {
+void init_ipcs(unsigned short *outils) {
     key_t cle_mecano;
     key_t cle_client;
-
-    unsigned short val_init_semap_client[1]={1};
-    // tab = malloc(sizeof(int) * (nb_chefs + 1));
 
     init_fm(LETTRE_CODE_MECANO, &cle_mecano, &fm_mecano);
     if (fm_mecano == -1) {
@@ -156,54 +146,6 @@ void init_ipcs(int nb_chefs, unsigned short *outils) {
         deconnexion_fm(fm_mecano);
         deconnexion_semap(semap_fm_mecano);
         exit(EXIT_FAILURE);
-    }
-
-    init_smp(cle_client, tab, sizeof(int) * (nb_chefs + 1), &smp);
-    if (smp == -1) {
-	    /* On detruit les IPC deje crees : */
-        deconnexion_fm(fm_mecano);
-        deconnexion_semap(semap_fm_mecano);
-        deconnexion_fm(fm_client);
-        exit(EXIT_FAILURE);
-    }
-
-    smp = shmget(cle_client, sizeof(int) * (nb_chefs + 1), IPC_CREAT | 0660);
-    if (smp == -1) {
-        fprintf(stderr, "Probleme creation SMP ou il existe deja\n");
-        /* On detruit les IPC deje crees : */
-        deconnexion_fm(fm_mecano);
-        deconnexion_semap(semap_fm_mecano);
-        deconnexion_fm(fm_client);
-        exit(EXIT_FAILURE);
-    }
-
-    /* Attachement de la memoire partagee */
-    tab = shmat(smp, NULL, 0);
-    if (tab == (int *) -1) {
-        fprintf(stderr, "Probleme attachement SMP\n");
-        /* Il faut detruire le SMP puisqu'on l'a cree */
-        /* On detruit les IPC deje crees : */
-        deconnexion_fm(fm_mecano);
-        deconnexion_semap(semap_fm_mecano);
-        deconnexion_fm(fm_client);
-        deconnexion_smp(tab, smp);
-        exit(EXIT_SUCCESS);
-    }
-
-    init_semap(cle_client, &semap_smp, val_init_semap_client);
-    if (semap_smp == -1) {
-	    /* On detruit les IPC deje crees : */
-        deconnexion_fm(fm_mecano);
-        deconnexion_semap(semap_fm_mecano);
-        deconnexion_fm(fm_client);
-        deconnexion_smp(tab, smp);
-        exit(EXIT_FAILURE);
-    }
-
-    /* Tout est OK, on initialise */
-    tab[0] = nb_chefs;
-    for (int i = 1; i <= nb_chefs; i++) {
-        tab[i] = 0;
     }
 }
 
@@ -255,7 +197,7 @@ int main(int argc, char *argv[]) {
 
     mon_sigaction(SIGUSR1, arret_general);
 
-    init_ipcs(nb_chefs, outils);
+    init_ipcs(outils);
 
     ouvre_garage(nb_chefs, nb_mecanos, outils_str);
     

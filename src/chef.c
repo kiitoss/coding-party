@@ -1,6 +1,5 @@
 #include "../includes/global.h"
 #include "../includes/fm-gestionnaire.h"
-#include "../includes/smp-gestionnaire.h"
 #include "../includes/sigaction-gestionnaire.h"
 
 int main(int argc, char *argv[]) {
@@ -12,7 +11,7 @@ int main(int argc, char *argv[]) {
     reponse_mecano_t rep_mecano;
     key_t cle_mecano, cle_client;
 
-    int fm_mecano, fm_client, smp;
+    int fm_mecano, fm_client;
 
     int ordre = atoi(argv[1]);
     long type_reponse_mecano;
@@ -34,25 +33,13 @@ int main(int argc, char *argv[]) {
     connexion_fm("chef", LETTRE_CODE_CLIENT, &cle_client, &fm_client);
     if (fm_client == -1) exit(EXIT_FAILURE);
 
-
-    connexion_smp(cle_client, &smp);
-
-
-    int *tab = shmat(smp, NULL, 0);
-    if (tab == (int *) -1) {
-        fprintf(stderr, "Probleme attachement SMP du client\n");
-        exit(EXIT_FAILURE);
-    }
-
-    int nb_chefs = tab[0];
-
     for (;;) {
-        type_reponse_mecano = REQUETE_TYPE_TAF + nb_chefs + ordre;
+        type_reponse_mecano = REQUETE_TYPE_TAF + ordre;
 
         couleur(ROUGE);
         fprintf(stdout, "Chef n°%d: Disponible\n", ordre);
         
-        fm_client_attend_requete(fm_client, ordre, &req_client);
+        fm_client_attend_requete(fm_client, &req_client);
 
         couleur(ROUGE);
         fprintf(stdout, "Chef n°%d: Reçoit une demande du client n°%d\n", ordre, req_client.pid_client);
