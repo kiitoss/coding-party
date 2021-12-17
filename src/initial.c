@@ -194,6 +194,8 @@ int main(int argc, char *argv[]) {
     char *outils_str[NB_OUTILS];
     unsigned short outils[NB_OUTILS];
     int param_valides = 1;
+    sigset_t mask;
+
 
     /* Verficiation des parametres */
     if (argc < 3 + NB_OUTILS) {
@@ -217,6 +219,12 @@ int main(int argc, char *argv[]) {
         }
     }
     if (!param_valides) usage(argv[0]);
+
+    sigfillset(&mask);
+    sigprocmask(SIG_SETMASK, &mask, NULL);
+
+    sigdelset(&mask, SIGUSR1);
+    sigprocmask(SIG_SETMASK, &mask, NULL);
 
     mon_sigaction(SIGUSR1, arret_general);
 
