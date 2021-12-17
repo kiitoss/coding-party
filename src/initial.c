@@ -107,12 +107,20 @@ void exec_client(int nb_chefs) {
     char nb_chefs_str[taille_chefs];
     sprintf(nb_chefs_str, "%d", nb_chefs);
 
+    int taille_fm_client_str = taille_int(fm_client);
+    char fm_client_str[taille_fm_client_str];
+    sprintf(fm_client_str, "%d", fm_client);
+
+    int taille_smp = taille_int(smp);
+    char smp_str[taille_smp];
+    sprintf(smp_str, "%d", smp);
+
     for(;;) {
         pid = fork(); 
          
         if (pid == -1) break;
         if (pid == 0) {
-            execl("client", "client", nb_chefs_str, NULL);
+            execl("client", "client", nb_chefs_str, fm_client_str, smp_str, NULL);
             exit(EXIT_FAILURE);
         } else {
             nouveau_fils(pid);
@@ -128,7 +136,7 @@ void init_ipcs(int nb_chefs, unsigned short *outils) {
     key_t cle_client;
 
     unsigned short val_init_semap_client[1]={1};
-    tab = malloc(sizeof(int) * nb_chefs);
+    // tab = malloc(sizeof(int) * (nb_chefs + 1));
 
     init_fm(LETTRE_CODE_MECANO, &cle_mecano, &fm_mecano);
     if (fm_mecano == -1) {
@@ -150,13 +158,36 @@ void init_ipcs(int nb_chefs, unsigned short *outils) {
         exit(EXIT_FAILURE);
     }
 
-    init_smp(cle_client, tab, &smp);
+    init_smp(cle_client, tab, sizeof(int) * (nb_chefs + 1), &smp);
     if (smp == -1) {
 	    /* On detruit les IPC deje crees : */
         deconnexion_fm(fm_mecano);
         deconnexion_semap(semap_fm_mecano);
         deconnexion_fm(fm_client);
         exit(EXIT_FAILURE);
+    }
+
+    smp = shmget(cle_client, sizeof(int) * (nb_chefs + 1), IPC_CREAT | 0660);
+    if (smp == -1) {
+        fprintf(stderr, "Probleme creation SMP ou il existe deja\n");
+        /* On detruit les IPC deje crees : */
+        deconnexion_fm(fm_mecano);
+        deconnexion_semap(semap_fm_mecano);
+        deconnexion_fm(fm_client);
+        exit(EXIT_FAILURE);
+    }
+
+    /* Attachement de la memoire partagee */
+    tab = shmat(smp, NULL, 0);
+    if (tab == (int *) -1) {
+        fprintf(stderr, "Probleme attachement SMP\n");
+        /* Il faut detruire le SMP puisqu'on l'a cree */
+        /* On detruit les IPC deje crees : */
+        deconnexion_fm(fm_mecano);
+        deconnexion_semap(semap_fm_mecano);
+        deconnexion_fm(fm_client);
+        deconnexion_smp(tab, smp);
+        exit(EXIT_SUCCESS);
     }
 
     init_semap(cle_client, &semap_smp, val_init_semap_client);
@@ -170,7 +201,8 @@ void init_ipcs(int nb_chefs, unsigned short *outils) {
     }
 
     /* Tout est OK, on initialise */
-    for (int i = 0; i < nb_chefs; i++) {
+    tab[0] = nb_chefs;
+    for (int i = 1; i <= nb_chefs; i++) {
         tab[i] = 0;
     }
 }

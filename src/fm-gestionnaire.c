@@ -7,11 +7,11 @@ void init_fm(char code, key_t *cle, int *fm) {
     /* Creation de la cle */
     /* 1 - On teste si le fichier cle existe dans le repertoire courant */
     fich_cle = fopen(FICHIER_CLE, "r");
-    if (fich_cle == NULL){
-        if (errno == ENOENT){
+    if (fich_cle == NULL) {
+        if (errno == ENOENT) {
             /* on le cree */
             fich_cle = fopen(FICHIER_CLE, "w");
-            if (fich_cle == NULL){
+            if (fich_cle == NULL) {
                 fprintf(stderr, "Ouverture du garage impossible\n");
                 *fm = -1;
                 return;
@@ -122,22 +122,23 @@ void fm_mecano_envoie_reponse(int fm, long type) {
 
 
 
-void fm_client_envoie_requete(int fm, pid_t pid_client) {
+void fm_client_envoie_requete(int fm, int ordre_chef, pid_t pid_client) {
     requete_client_t requete;
 
     /* creation de la requete */
     requete.type = REQUETE_TYPE_TAF;
+    requete.ordre_chef = ordre_chef;
     requete.pid_client = pid_client;
     
     /* envoi de la requete */
     msgsnd(fm, &requete, sizeof(requete_client_t), 0);
 }
 
-void fm_client_attend_requete(int fm, requete_client_t *req) {
+void fm_client_attend_requete(int fm, int ordre_chef, requete_client_t *req) {
     int res_rcv;
 
     /* attente de la requete */
-    res_rcv = msgrcv(fm, req, sizeof(requete_client_t), REQUETE_TYPE_TAF, 0);
+    res_rcv = msgrcv(fm, req, sizeof(requete_client_t), ordre_chef, 0);
     if (res_rcv == -1) {
 	    fprintf(stderr, "Erreur, numero %d\n", errno);
 	    exit(EXIT_FAILURE);

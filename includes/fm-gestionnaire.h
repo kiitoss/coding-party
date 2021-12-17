@@ -22,6 +22,7 @@ typedef struct {
 
 typedef struct {
     long type;
+    int ordre_chef;
     pid_t pid_client;
 } requete_client_t;
 
@@ -39,8 +40,8 @@ void fm_mecano_attend_requete(int fm, requete_mecano_t *req);
 
 void fm_mecano_attend_reponse(int fm, long type_reponse, reponse_mecano_t *rep);
 
-void fm_client_envoie_requete(int fm, pid_t pid_client);
+void fm_client_envoie_requete(int fm, int ordre_chef, pid_t pid_client);
 
-void fm_client_attend_requete(int fm, requete_client_t *req);
+void fm_client_attend_requete(int fm, int ordre_chef, requete_client_t *req);
 
 #endif
