@@ -2,12 +2,12 @@
 #include "../includes/fm-gestionnaire.h"
 #include "../includes/sigaction-gestionnaire.h"
 
-void operation_outils(int semap, unsigned short *outils, int action) {
+void operation_outils(int semap, unsigned short *outils, int pos_neg) {
     struct sembuf *sops = (struct sembuf *) malloc(NB_OUTILS * sizeof(struct sembuf)); 
 
     for (int i = 0; i < NB_OUTILS; i++) {
         sops[i].sem_num = i;
-        sops[i].sem_op = action;
+        sops[i].sem_op = pos_neg * outils[i];
         sops[i].sem_flg = SEM_UNDO;
     }
 
@@ -25,9 +25,12 @@ int main(int argc, char *argv[]) {
 
     requete_mecano_t requete;
 
+    if (argc != 2) exit(EXIT_FAILURE);
+
     mon_sigaction(SIGUSR1, arret);
     
     connexion_fm("mecanicien", LETTRE_CODE_MECANO, &cle, &fm);
+    if (fm == -1) exit(EXIT_FAILURE);
 
     /* Recuperation semaphore */
     int semap = semget(cle, 1, 0);

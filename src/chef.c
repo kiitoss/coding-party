@@ -3,6 +3,8 @@
 #include "../includes/sigaction-gestionnaire.h"
 
 int main(int argc, char *argv[]) {
+    if (argc != 2 + NB_OUTILS) exit(EXIT_FAILURE);
+    
     srand(getpid());  
 
     requete_client_t req_client;
@@ -24,7 +26,10 @@ int main(int argc, char *argv[]) {
     
 
     connexion_fm("chef", LETTRE_CODE_MECANO, &cle_mecano, &fm_mecano);
+    if (fm_mecano == -1) exit(EXIT_FAILURE);
+
     connexion_fm("chef", LETTRE_CODE_CLIENT, &cle_client, &fm_client);
+    if (fm_client == -1) exit(EXIT_FAILURE);
 
 
     for (;;) {

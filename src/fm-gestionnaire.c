@@ -13,25 +13,29 @@ void init_fm(char code, key_t *cle, int *fm) {
             fich_cle = fopen(FICHIER_CLE, "w");
             if (fich_cle == NULL){
                 fprintf(stderr, "Ouverture du garage impossible\n");
-                exit(EXIT_FAILURE);
+                *fm = -1;
+                return;
             }
         } else {
             fprintf(stderr, "Ouverture du garage impossible\n");
-            exit(EXIT_FAILURE);
+            *fm = -1;
+            return;
         }
     }
 
     *cle = ftok(FICHIER_CLE, code);
     if (*cle == -1) {
 	    fprintf(stderr, "(chef) Probleme creation cle\n");
-	    exit(EXIT_FAILURE);
+	    *fm = -1;
+        return;
     }
 
     /* Creation file de message */
     *fm = msgget(*cle, IPC_CREAT | 0660);
     if (*fm == -1) {
 	    fprintf(stderr, "Probleme creation file de message\n");
-	    exit(EXIT_FAILURE);
+	    *fm = -1;
+        return;
     }
 }
 
@@ -42,21 +46,24 @@ void connexion_fm(char *type_personne, char code, key_t *cle, int *fm) {
     fich_cle = fopen(FICHIER_CLE,"r");
     if (fich_cle == NULL) {
         fprintf(stderr, "(%s) Lancement client impossible\n", type_personne);
-        exit(EXIT_FAILURE);
+        *fm = -1;
+        return;
     }
 
     /* Creation de la cle */
     *cle = ftok(FICHIER_CLE, code);
     if (*cle == -1) {
 	    fprintf(stderr, "(%s) Probleme creation cle\n", type_personne);
-	    exit(EXIT_FAILURE);
+	    *fm = -1;
+        return;
     }
 
     /* Recuperation file de message */
     *fm = msgget(*cle, 0);
     if (*fm == -1) {
 	    fprintf(stderr, "(%s) Probleme recuperation file de message\n", type_personne);
-	    exit(EXIT_FAILURE);
+	    *fm = -1;
+        return;
     }
 }
 
